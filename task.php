@@ -60,6 +60,7 @@ $animal->index();
 
 echo "<h3>Store - Menambahkan hewan baru </h3>";
 $animal->store('burung');
+$animal->store('anjing');
 $animal->index();
 
 
