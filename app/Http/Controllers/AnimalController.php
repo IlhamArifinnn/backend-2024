@@ -6,12 +6,15 @@ use Illuminate\Http\Request;
 
 class AnimalController extends Controller
 {
+
+    private $animals = ['Ayam', 'Kucing', 'Harimau', 'kelinci'];
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        echo "menampilkan data animals";
+        return response()->json(['isi array dari dari animals' => $this->animals]);
     }
 
     /**
@@ -27,7 +30,15 @@ class AnimalController extends Controller
      */
     public function store(Request $request)
     {
-        echo "menambahkan data animals";
+        // Validasi input
+        $request->validate([
+            'name' => 'required|string',
+        ]);
+
+        // Menambahkan data hewan ke array
+        array_push($this->animals, $request->name);
+
+        return response()->json(['pesan' => 'Berhasil menambahkan Hewan ke Array!', 'animals' => $this->animals]);
     }
 
     /**
@@ -51,7 +62,17 @@ class AnimalController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        echo "meng-update data animals {$id}";
+        // Validasi input
+        $request->validate([
+            'name' => 'required|string',
+        ]);
+
+        if (isset($this->animals[$id])) {
+            $this->animals[$id] = $request->name;
+            return response()->json(['pesan' => 'Hewan berhasil diperbarui!', 'animals' => $this->animals]);
+        } else {
+            return response()->json(['pesan' => 'Hewan tidak ditemukan!'], 404);
+        }
     }
 
     /**
@@ -59,6 +80,12 @@ class AnimalController extends Controller
      */
     public function destroy(string $id)
     {
-        echo "menghapus data animals {$id}";
+        if (isset($this->animals[$id])) {
+            unset($this->animals[$id]);
+            $this->animals = array_values($this->animals);
+            return response()->json(['Pesan' => 'Hewan berhasil dihapus!', 'animals' => $this->animals]);
+        } else {
+            return response()->json(['Pesan' => 'Hewan tidak ditemukan!'], 404);
+        }
     }
 }

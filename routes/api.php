@@ -10,9 +10,6 @@ Route::get('/user', function (Request $request) {
 
 
 Route::get('/animals', [AnimalController::class, 'index']);
-
 Route::post('/animals', [AnimalController::class, 'store']);
-
 Route::put('/animals/{id}', [AnimalController::class, 'update']);
-
 Route::delete('/animals/{id}', [AnimalController::class, 'destroy']);
