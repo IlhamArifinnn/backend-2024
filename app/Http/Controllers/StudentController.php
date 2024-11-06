@@ -22,26 +22,16 @@ class StudentController extends Controller
         return response()->json($data, 200);
     }
 
-    public function show(Student $id)
+    public function show(Student $student)
     {
-        $student = Student::find($id);
+        $data = [
+            'message' => 'Get details of student',
+            'data' => $student,
+        ];
 
-        if ($student) {
-            $data = [
-                'message' => 'Get details of student',
-                'data' => $student,
-            ];
-
-            return response()->json($data, 200);
-        } else {
-            $data = [
-                'message' => 'Student not found',
-                'data' => null,
-            ];
-
-            return response()->json($data, 404);
-        }
+        return response()->json($data, 200);
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -68,58 +58,33 @@ class StudentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Student $id)
+    public function update(Request $request, Student $student)
     {
-        $student = Student::find($id);
+        $input = [
+            'nama' => $request->nama ?? $student->nama,
+            'nim' => $request->nim ?? $student->nim,
+            'email' => $request->email ?? $student->email,
+            'jurusan' => $request->jurusan ?? $student->jurusan,
+        ];
 
-        if ($student) {
-            $input = [
-                'nama' => $request->nama ?? $student->nama,
-                'nim' => $request->nim ?? $student->nim,
-                'email' => $request->email ?? $student->email,
-                'jurusan' => $request->jurusan ?? $student->jurusan,
-            ];
+        $student->update($input);
 
-            $student->update($input);
+        $data = [
+            'message' => 'student is updated successfully',
+            'data' => $student,
+        ];
 
-            $data = [
-                'message' => 'student is updated succesfully',
-                'data' => $student,
-            ];
-            return response()->json($data, 200);
-        } else {
-            $data = [
-                'message' => 'Student not found',
-                'data' => null,
-            ];
-
-            return response()->json($data, 404);
-        }
+        return response()->json($data, 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Student $id)
+    public function destroy(Student $student)
     {
-        $student = Student::find($id);
+        $student->delete();
 
-        if ($student) {
-            $student->delete();
+        $data = [
+            'message' => 'student is deleted successfully',
+        ];
 
-            $data = [
-                'message' => 'student is deleted succesfully',
-                'data' => null,
-            ];
-
-            return response()->json($data, 200);
-        } else {
-            $data = [
-                'message' => 'Student not found',
-                'data' => null,
-            ];
-
-            return response()->json($data, 404);
-        }
+        return response()->json($data, 200);
     }
 }
