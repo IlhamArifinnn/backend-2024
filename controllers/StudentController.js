@@ -60,4 +60,4 @@ class StudentController {
 const object = new StudentController();
 
 // Export object StudentController
-module.exports = object;
+export default object;
