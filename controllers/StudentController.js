@@ -15,6 +15,20 @@ class StudentController {
     res.json(data);
   }
 
+  static create(data) {
+    return new Promise((resolve, reject) => {
+      const sql = "INSERT INTO students SET ?";
+      db.query(sql, data, (err, results) => {
+        if (err) {
+          reject(err);
+        } else {
+          // Mengembalikan data yang baru diinsert
+          resolve({ id: results.insertId, ...data });
+        }
+      });
+    });
+  }
+
   async store(req, res) {
     /**
      * TODO 2: memanggil method create.
@@ -22,36 +36,97 @@ class StudentController {
      * Mengembalikan response dalam bentuk json.
      */
     // code here
+    try {
+      const { nama, nim, email, jurusan } = req.body;
+      const dataToInsert = { nama, nim, email, jurusan };
 
-    const data = {
-      message: "Menambahkan data student",
-      data: [],
-    };
+      const newStudent = await Student.create(dataToInsert);
 
-    res.json(data);
+      const data = {
+        message: "Menambahkan data student",
+        data: newStudent,
+      };
+
+      res.status(201).json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Error menambahkan data", error });
+    }
   }
 
-  update(req, res) {
-    const { id } = req.params;
-    const { nama } = req.body;
+  async update(req, res) {
+    try {
+      const { id } = req.params; // Ambil ID dari URL
+      const { nama, nim, email, jurusan } = req.body; // Ambil data dari body
 
-    const data = {
-      message: `Mengedit student id ${id}, nama ${nama}`,
-      data: [],
-    };
+      // Pastikan data tidak kosong
+      if (!nama || !nim || !email || !jurusan) {
+        return res.status(400).json({ message: "Data tidak lengkap" });
+      }
 
-    res.json(data);
+      const sql = "UPDATE students SET ? WHERE id = ?";
+      const dataToUpdate = { nama, nim, email, jurusan };
+
+      db.query(sql, [dataToUpdate, id], (err, results) => {
+        if (err) {
+          console.error("Error query:", err); // Debug error
+          return res
+            .status(500)
+            .json({ message: "Error mengupdate data", error: err });
+        }
+
+        // Jika tidak ada data yang diperbarui
+        if (results.affectedRows === 0) {
+          return res
+            .status(404)
+            .json({ message: `Student dengan ID ${id} tidak ditemukan` });
+        }
+
+        const data = {
+          message: `Mengedit student id ${id}`,
+          data: { id, ...dataToUpdate },
+        };
+
+        res.json(data);
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error mengupdate data", error });
+    }
   }
 
-  destroy(req, res) {
-    const { id } = req.params;
+  async destroy(req, res) {
+    try {
+      const { id } = req.params; // Ambil ID dari URL
 
-    const data = {
-      message: `Menghapus student id ${id}`,
-      data: [],
-    };
+      // Query DELETE
+      const sql = "DELETE FROM students WHERE id = ?";
+      db.query(sql, [id], (err, results) => {
+        console.log("Parameter ID:", id); // Debug ID
+        console.log("Hasil query:", results); // Debug hasil query
 
-    res.json(data);
+        if (err) {
+          console.error("Error query:", err); // Debug error
+          return res
+            .status(500)
+            .json({ message: "Error menghapus data", error: err });
+        }
+
+        // Jika data tidak ditemukan
+        if (results.affectedRows === 0) {
+          return res
+            .status(404)
+            .json({ message: `Student dengan ID ${id} tidak ditemukan` });
+        }
+
+        const data = {
+          message: `Menghapus student id ${id}`,
+          data: null,
+        };
+
+        res.json(data);
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error menghapus data", error });
+    }
   }
 }
 
