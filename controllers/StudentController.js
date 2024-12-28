@@ -36,96 +36,64 @@ class StudentController {
      * Mengembalikan response dalam bentuk json.
      */
     // code here
-    try {
-      const { nama, nim, email, jurusan } = req.body;
-      const dataToInsert = { nama, nim, email, jurusan };
+    const student = await Student.create(req.body);
 
-      const newStudent = await Student.create(dataToInsert);
+    const data = {
+      message: "Menambahkan data student",
+      data: student,
+    };
 
-      const data = {
-        message: "Menambahkan data student",
-        data: newStudent,
-      };
-
-      res.status(201).json(data);
-    } catch (error) {
-      res.status(500).json({ message: "Error menambahkan data", error });
-    }
+    res.json(data);
   }
 
   async update(req, res) {
     try {
-      const { id } = req.params; // Ambil ID dari URL
-      const { nama, nim, email, jurusan } = req.body; // Ambil data dari body
+      const { id } = req.params;
 
-      // Pastikan data tidak kosong
-      if (!nama || !nim || !email || !jurusan) {
-        return res.status(400).json({ message: "Data tidak lengkap" });
+      // Cari student berdasarkan ID
+      const student = await Student.find(id);
+
+      if (!student) {
+        return res.status(404).json({
+          message: "Student not found",
+          data: null,
+        });
       }
 
-      const sql = "UPDATE students SET ? WHERE id = ?";
-      const dataToUpdate = { nama, nim, email, jurusan };
+      // Update student
+      const updatedStudent = await Student.update(id, req.body);
 
-      db.query(sql, [dataToUpdate, id], (err, results) => {
-        if (err) {
-          console.error("Error query:", err); // Debug error
-          return res
-            .status(500)
-            .json({ message: "Error mengupdate data", error: err });
-        }
+      const data = {
+        message: "Mengupdate data student",
+        data: updatedStudent,
+      };
 
-        // Jika tidak ada data yang diperbarui
-        if (results.affectedRows === 0) {
-          return res
-            .status(404)
-            .json({ message: `Student dengan ID ${id} tidak ditemukan` });
-        }
-
-        const data = {
-          message: `Mengedit student id ${id}`,
-          data: { id, ...dataToUpdate },
-        };
-
-        res.json(data);
-      });
+      res.status(200).json(data);
     } catch (error) {
-      res.status(500).json({ message: "Error mengupdate data", error });
+      res.status(500).json({
+        message: "Error mengupdate data student",
+        error: error.message,
+      });
     }
   }
 
   async destroy(req, res) {
-    try {
-      const { id } = req.params; // Ambil ID dari URL
+    const { id } = req.params;
+    const student = await Student.find(id);
 
-      // Query DELETE
-      const sql = "DELETE FROM students WHERE id = ?";
-      db.query(sql, [id], (err, results) => {
-        console.log("Parameter ID:", id); // Debug ID
-        console.log("Hasil query:", results); // Debug hasil query
-
-        if (err) {
-          console.error("Error query:", err); // Debug error
-          return res
-            .status(500)
-            .json({ message: "Error menghapus data", error: err });
-        }
-
-        // Jika data tidak ditemukan
-        if (results.affectedRows === 0) {
-          return res
-            .status(404)
-            .json({ message: `Student dengan ID ${id} tidak ditemukan` });
-        }
-
-        const data = {
-          message: `Menghapus student id ${id}`,
-          data: null,
-        };
-
-        res.json(data);
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Error menghapus data", error });
+    if (student) {
+      await Student.delete(id);
+      const data = {
+        message: "Menghapus data student",
+        data: null,
+      };
+      res.status(200).json(data);
+    } else {
+      const data = {
+        message: "Student not found",
+        data: null,
+      };
+      res.status(404).json(data);
     }
   }
 }

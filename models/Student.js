@@ -39,6 +39,50 @@ class Student {
       });
     });
   }
+
+  static find(id) {
+    return new Promise((resolve, reject) => {
+      const sql = "SELECT * FROM students WHERE id = ? LIMIT 1";
+      db.query(sql, [id], (err, results) => {
+        if (err) {
+          return reject(err);
+        }
+
+        // Jika data ditemukan, kembalikan data; jika tidak, kembalikan null
+        resolve(results.length > 0 ? results[0] : null);
+      });
+    });
+  }
+
+  // File: models/Student.js
+
+  static update(id, data) {
+    return new Promise((resolve, reject) => {
+      const sql = "UPDATE students SET ? WHERE id = ?";
+      db.query(sql, [data, id], (err, results) => {
+        if (err) {
+          return reject(err);
+        }
+
+        // Jika data tidak ditemukan (affectedRows = 0), kembalikan null
+        if (results.affectedRows === 0) {
+          return resolve(null);
+        }
+
+        // Kembalikan data yang diperbarui
+        resolve({ id, ...data });
+      });
+    });
+  }
+
+  static delete(id) {
+    return new Promise((resolve, reject) => {
+      const sql = "DELETE FROM students WHERE id = ?";
+      db.query(sql, id, (err, results) => {
+        resolve(results);
+      });
+    });
+  }
 }
 
 // export class Student
